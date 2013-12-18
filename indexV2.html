@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Highcharts Example</title>
+
+    <script type="text/javascript" src="jquery-1.9.1.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var chart_dates = [1386720000000, 1386806400000, 1386892800000, 1386979200000, 1387065600000, 1387152000000, 1387238400000];
+            Highcharts.setOptions({
+                global: {useUTC: false
+                },
+                lang: {
+                    resetZoom: '还原',
+                    numericSymbols: ['万', '亿']
+                }});
+            var activePoint = 0;
+            var chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: "container",
+                    zoomType: 'x'
+                },
+                title: {
+                    text: ""
+                },
+                credits: {
+                    enabled: false
+                },
+                tooltip: {
+                    shared: true,
+                    crosshairs: true,
+                    formatter: function () {
+                        var dateObj = new Date(this.x);
+                        var d = dateObj.getFullYear() + '-' + (dateObj.getMonth() + 1) + '-' + dateObj.getDate();
+                        var s = "日期:" + d;
+                        $.each(this.points, function (i, point) {
+                            activePoint = $.inArray(point.x, chart_dates);
+                            if (point.series.name == '比例') {
+                                s += "<br/>" + point.series.name + ":" + Highcharts.numberFormat(point.y, 2) + "%";
+                            } else {
+                                s += "<br/>" + point.series.name + ":" + Highcharts.numberFormat(point.y, 0);
+                            }
+                        });
+                        return s;
+                    }
+                },
+                xAxis: {
+                    type: "datetime",
+                    dateTimeLabelFormats: {
+                        minute: '%H:%M',
+                        day: '%Y-%m-%d',
+                        week: '%y-%m-%d',
+                        month: '%Y-%m',
+                        year: '%Y'
+                    }
+                },
+                yAxis: [
+                    {
+                        min: 0,
+                        max: 100,
+                        title: {text: ''},
+                        labels: {
+                        }
+                    },
+                    {
+                        min: 0,
+                        max: 100,
+                        labels: {
+                            format: '{value}%'
+                        },
+                        title: {text: ''},
+                        opposite: true
+                    }],
+                plotOptions: {
+                    series: {
+                        connectNulls: true,
+                        marker: {
+                            enabled: true,
+                            states: {
+                                hover: {
+                                    enabled: true
+                                }
+                            }
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '得分',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        data: [
+                            [1386720000000, 75],
+                            [1386806400000, null],
+                            [1386892800000, 80],
+                            [1386979200000, 90],
+                            [1387065600000, 92],
+                            [1387152000000, 91],
+                            [1387238400000, 97]
+                        ],
+                        yAxis: 0,
+                        type: 'column'
+                    },
+                    {
+                        name: '比例',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        yAxis: 1,
+                        data: [
+                            [1386720000000, 20],
+                            [1386806400000, 12.5],
+                            [1386892800000, 10.2],
+                            [1386979200000, null],
+                            [1387065600000, 13.52],
+                            [1387152000000, 80.5],
+                            [1387238400000, 70.2]
+                        ],
+                        lineWidth: 2
+                    }]
+            }, function (chart) {
+            });
+            var activeChart=0;
+            $("#container").mouseover(function(){
+                activeChart=1;
+            });
+            $("#container").mouseleave(function( ){
+                activeChart=0;
+                activePoint=0;
+            });
+            $(document).keydown(function (e) {
+                if(activeChart==0) return false;
+                switch (e.which) {
+                    case 37:
+                        if (activePoint > 0) {
+                            activePoint--;
+                        }
+                        break;
+                    case 39:
+                        if (activePoint + 1 < chart.series[0].data.length) {
+                            activePoint++;
+                        }
+                        break;
+                }
+                if(e.which==37||e.which==39){
+                    var refresh_series=new Array();
+                    for(var i=0;i<chart.series.length;i++){
+                        if(chart.series[i].visible){
+                            refresh_series.push(chart.series[i].data[activePoint]);
+                        }
+                    }
+                    if(refresh_series.length>0){
+                        chart.tooltip.refresh(refresh_series);
+                    }
+                }
+            });
+        });
+
+
+    </script>
+</head>
+<body>
+<script src="../../js/highcharts.js"></script>
+<script src="../../js/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+</body>
+
+</html>
